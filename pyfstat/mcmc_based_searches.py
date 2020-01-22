@@ -1732,7 +1732,7 @@ class MCMCSearch(core.BaseSearchClass):
             logging.info("theta0 index: {}".format(self.theta0_idx))
         logging.info("Max twoF: {} with parameters:".format(max_twoF))
         for k in np.sort(list(max_twoFd.keys())):
-            print("  {:10s} = {:1.9e}".format(k, max_twoFd[k]))
+            logging.info("  {:10s} = {:1.9e}".format(k, max_twoFd[k]))
         logging.info("Median +/- std for production values")
         for k in np.sort(list(median_std_d.keys())):
             if "std" not in k:
