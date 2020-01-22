@@ -46,6 +46,16 @@ class Writer(BaseSearchClass):
         maxStartTime=None,
         add_noise=True,
         transientWindowType="none",
+        asini=0,
+        period=0,
+        tp=0,
+        ecc=0,
+        argp=0,
+        noiseSFTs='none',
+        windowSFTsType='tukey',
+        windowSFTsBeta=0.001,
+        ephemEarth='none',
+        ephemSun='none'
     ):
         """
         Parameters
@@ -186,6 +196,56 @@ transientTau = {:10.0f}\n"""
             duration_days * 86400,
         )
 
+    def get_single_config_line_binarycw(
+        self,
+        i,
+        Alpha,
+        Delta,
+        h0,
+        cosi,
+        psi,
+        phi,
+        F0,
+        F1,
+        F2,
+        tref,
+        asini,
+        period,
+        tp,
+        ecc,
+        argp
+    ):
+        template = (
+            self.get_base_template(
+                i, Alpha, Delta, h0, cosi, psi, phi, F0, F1, F2, tref
+            )
+            + """
+orbitasini = {:2.5f}
+orbitPeriod = {:5.5f}
+orbitTp = {:10.5f}
+orbitEcc = {:1.5f}
+orbitArgp = {:2.5f}\n"""
+        )
+        return template.format(
+            i,
+            Alpha,
+            Delta,
+            h0,
+            cosi,
+            psi,
+            phi,
+            F0,
+            F1,
+            F2,
+            tref,
+            asini,
+            period,
+            tp,
+            ecc,
+            argp
+        )
+
+
     def get_single_config_line(
         self,
         i,
@@ -202,6 +262,11 @@ transientTau = {:10.0f}\n"""
         window,
         tstart,
         duration_days,
+        asini,
+        period,
+        tp,
+        ecc,
+        argp
     ):
         if window == "none":
             return self.get_single_config_line_cw(
@@ -225,6 +290,20 @@ transientTau = {:10.0f}\n"""
                 duration_days,
             )
 
+        if window == 'none':
+            if asini == 0:
+                return self.get_single_config_line_cw(
+                    i, Alpha, Delta, h0, cosi, psi, phi, F0, F1, F2, tref
+                )
+            else:
+                return self.get_single_config_line_binarycw(
+                    i, Alpha, Delta, h0, cosi, psi, phi, F0, F1, F2, tref, asini, period, tp, ecc, argp
+                )
+        else:
+            return self.get_single_config_line_tcw(
+                i, Alpha, Delta, h0, cosi, psi, phi, F0, F1, F2, tref, window, tstart, duration_days
+            )
+
     def make_cff(self):
         """
         Generates a .cff file
@@ -246,6 +325,11 @@ transientTau = {:10.0f}\n"""
             self.transientWindowType,
             self.tstart,
             self.duration_days,
+            self.asini,
+            self.period,
+            self.tp,
+            self.ecc,
+            self.argp,
         )
 
         if self.check_if_cff_file_needs_rewritting(content):
@@ -360,12 +444,20 @@ transientTau = {:10.0f}\n"""
 
         cl_mfd = []
         cl_mfd.append("lalapps_Makefakedata_v5")
+        cl_mfd.append('--ephemEarth="{}"'.format(self.ephemEarth))
+        cl_mfd.append('--ephemSun="{}"'.format(self.ephemSun))
         cl_mfd.append("--outSingleSFT=TRUE")
         cl_mfd.append('--outSFTdir="{}"'.format(self.outdir))
         cl_mfd.append('--outLabel="{}"'.format(self.label))
         cl_mfd.append("--IFOs={}".format(self.IFOs))
-        if self.add_noise:
-            cl_mfd.append('--sqrtSX="{}"'.format(self.sqrtSX))
+        if self.noiseSFTs=='none':
+            cl_mfd.append('--IFOs={}'.format(self.IFOs))
+            if self.add_noise:
+                cl_mfd.append('--sqrtSX="{}"'.format(self.sqrtSX))
+        else:
+            cl_mfd.append('--noiseSFTs="{}"'.format(self.noiseSFTs))
+            cl_mfd.append('--SFTWindowType="{}"'.format(self.windowSFTsType))
+            cl_mfd.append('--SFTWindowBeta={}'.format(self.windowSFTsBeta))
         if self.minStartTime is None:
             cl_mfd.append("--startTime={:0.0f}".format(float(self.tstart)))
         else:
@@ -380,12 +472,6 @@ transientTau = {:10.0f}\n"""
         cl_mfd.append("--Tsft={}".format(self.Tsft))
         if self.h0 != 0:
             cl_mfd.append('--injectionSources="{}"'.format(self.config_file_name))
-        earth_ephem = getattr(self, "earth_ephem", None)
-        sun_ephem = getattr(self, "sun_ephem", None)
-        if earth_ephem is not None:
-            cl_mfd.append('--ephemEarth="{}"'.format(earth_ephem))
-        if sun_ephem is not None:
-            cl_mfd.append('--ephemSun="{}"'.format(sun_ephem))
 
         cl_mfd = " ".join(cl_mfd)
         check_ok = self.check_cached_data_okay_to_use(cl_mfd)
