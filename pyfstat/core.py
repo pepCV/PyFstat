@@ -656,6 +656,7 @@ class ComputeFstat(BaseSearchClass):
         PulsarDopplerParams.Alpha = 1
         PulsarDopplerParams.Delta = 1
         PulsarDopplerParams.fkdot = np.array([0, 0, 0, 0, 0, 0, 0])
+        PulsarDopplerParams.timingFlag = self.binaryTimingFlag,
         self.PulsarDopplerParams = PulsarDopplerParams
 
         logging.info("Initialising FstatResults")
@@ -1162,6 +1163,7 @@ class SemiCoherentSearch(ComputeFstat):
         injectSources=None,
         assumeSqrtSX=None,
         SSBprec=None,
+        binaryTimingFlag,
     ):
         """
         Parameters
