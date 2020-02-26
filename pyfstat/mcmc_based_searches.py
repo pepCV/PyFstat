@@ -2276,7 +2276,7 @@ class MCMCSemiCoherentSearch(MCMCSearch):
         injectSources=None,
         assumeSqrtSX=None,
         nsegs=None,
-        binaryTimingFlag=0,
+        EccentricityTiming="ZeroEccentricity",
     ):
 
         self.theta_prior = theta_prior
@@ -2301,7 +2301,7 @@ class MCMCSemiCoherentSearch(MCMCSearch):
         self.injectSources = injectSources
         self.assumeSqrtSX = assumeSqrtSX
         self.nsegs = nsegs
-        self.binaryTimingFlag = binaryTimingFlag
+        self.EccentricityTiming = EccentricityTiming
 
         if os.path.isdir(outdir) is False:
             os.mkdir(outdir)
@@ -2363,7 +2363,7 @@ class MCMCSemiCoherentSearch(MCMCSearch):
             detectors=self.detectors,
             injectSources=self.injectSources,
             assumeSqrtSX=self.assumeSqrtSX,
-            binaryTimingFlag = self.binaryTimingFlag,
+            EccentricityTiming = self.EccentricityTiming,
         )
         if self.minStartTime is None:
             self.minStartTime = self.search.minStartTime

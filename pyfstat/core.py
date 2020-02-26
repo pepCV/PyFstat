@@ -577,6 +577,10 @@ class ComputeFstat(BaseSearchClass):
             FstatOAs.SSBprec = self.SSBprec
         else:
             FstatOAs.SSBprec = lalpulsar.FstatOptionalArgsDefaults.SSBprec
+        if self.EccentricityTiming:
+            FstatOAs.eccTiming = self.EccentricityTiming
+        else:
+            FstatOAs.eccTiming = lalpulsar.FstatOptionalArgsDefaults.eccTiming
         FstatOAs.Dterms = lalpulsar.FstatOptionalArgsDefaults.Dterms
         FstatOAs.runningMedianWindow = (
             lalpulsar.FstatOptionalArgsDefaults.runningMedianWindow
@@ -656,7 +660,6 @@ class ComputeFstat(BaseSearchClass):
         PulsarDopplerParams.Alpha = 1
         PulsarDopplerParams.Delta = 1
         PulsarDopplerParams.fkdot = np.array([0, 0, 0, 0, 0, 0, 0])
-        PulsarDopplerParams.timingFlag = self.binaryTimingFlag,
         self.PulsarDopplerParams = PulsarDopplerParams
 
         logging.info("Initialising FstatResults")
@@ -1163,7 +1166,7 @@ class SemiCoherentSearch(ComputeFstat):
         injectSources=None,
         assumeSqrtSX=None,
         SSBprec=None,
-        binaryTimingFlag,
+        EccentricityTiming,
     ):
         """
         Parameters
